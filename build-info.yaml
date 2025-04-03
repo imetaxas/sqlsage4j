@@ -1,0 +1,11 @@
+version: 2
+useBuildIdentity: true
+
+template:
+  type: javaBackend
+  javaBackend:
+    javaVersion: 17
+    documentation:
+      infoYamlPath: "./lib-info.yaml"
+    libraries:
+      - path: .

@@ -1,0 +1,12 @@
+id: queryfy
+description: |
+  Java RAG library for text-2-query
+system: queryfy
+owner: yanimetaxas
+visibility: private
+dependencies: []
+
+facts:
+  component_type: library
+  lifecycle: experimental
+  library_name: com.spotify:queryfy
