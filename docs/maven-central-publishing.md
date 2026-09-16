@@ -37,7 +37,7 @@ gpg --armor --export-secret-keys YOUR_KEY_ID
 
 ### 3. Configure GitHub Repository Secrets
 
-In your repository (`github.com/yanimetaxas/sqlsage4j`), go to **Settings → Secrets and variables → Actions** and add:
+In your repository (`github.com/imetaxas/sqlsage4j`), go to **Settings → Secrets and variables → Actions** and add:
 
 | Secret Name | Value |
 |---|---|

@@ -97,7 +97,7 @@ refactor: extract SQL validation into SqlGuard
 
 ## Reporting Bugs
 
-Open a [GitHub Issue](https://github.com/yanimetaxas/sqlsage4j/issues) with:
+Open a [GitHub Issue](https://github.com/imetaxas/sqlsage4j/issues) with:
 
 - sqlsage4j version
 - Java version
@@ -107,7 +107,7 @@ Open a [GitHub Issue](https://github.com/yanimetaxas/sqlsage4j/issues) with:
 
 ## Feature Requests
 
-Open a [GitHub Issue](https://github.com/yanimetaxas/sqlsage4j/issues) with the `feature_request` template. Describe the use case, not just the solution.
+Open a [GitHub Issue](https://github.com/imetaxas/sqlsage4j/issues) with the `feature_request` template. Describe the use case, not just the solution.
 
 ## License
 

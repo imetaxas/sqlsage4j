@@ -7,10 +7,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/yanimetaxas/sqlsage4j/actions"><img src="https://img.shields.io/github/actions/workflow/status/yanimetaxas/sqlsage4j/ci.yml?branch=master" alt="Build Status"></a>
+  <a href="https://github.com/imetaxas/sqlsage4j/actions"><img src="https://img.shields.io/github/actions/workflow/status/imetaxas/sqlsage4j/ci.yml?branch=master" alt="Build Status"></a>
   <img src="https://img.shields.io/badge/java-17%2B-blue" alt="Java 17+">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License"></a>
-  <a href="https://github.com/yanimetaxas/sqlsage4j/stargazers"><img src="https://img.shields.io/github/stars/yanimetaxas/sqlsage4j" alt="GitHub Stars"></a>
+  <a href="https://github.com/imetaxas/sqlsage4j/stargazers"><img src="https://img.shields.io/github/stars/imetaxas/sqlsage4j" alt="GitHub Stars"></a>
 </p>
 
 <p align="center">
@@ -164,7 +164,7 @@ Question → [Retrieve context from vector store] → [Assemble prompt] → [LLM
 <summary><strong>Building from Source</strong></summary>
 
 ```bash
-git clone https://github.com/yanimetaxas/sqlsage4j.git
+git clone https://github.com/imetaxas/sqlsage4j.git
 cd sqlsage4j
 mvn compile          # compile + auto-format
 mvn test             # unit tests
@@ -222,9 +222,9 @@ See [full configuration docs](docs/features.md#configuration) for all options.
 - :book: **[Feature Reference](docs/features.md)** — Full documentation with code examples
 - :rocket: **[Local LLM Guide](docs/local-llm-guide.md)** — 7 steps to 100% accuracy with free models
 - :shield: **[Security Guide](docs/security.md)** — Production security recommendations
-- :bug: **[Report a Bug](https://github.com/yanimetaxas/sqlsage4j/issues/new)**
-- :bulb: **[Request a Feature](https://github.com/yanimetaxas/sqlsage4j/discussions)**
-- :star: **[Star us on GitHub](https://github.com/yanimetaxas/sqlsage4j)** — it helps others find the project!
+- :bug: **[Report a Bug](https://github.com/imetaxas/sqlsage4j/issues/new)**
+- :bulb: **[Request a Feature](https://github.com/imetaxas/sqlsage4j/discussions)**
+- :star: **[Star us on GitHub](https://github.com/imetaxas/sqlsage4j)** — it helps others find the project!
 
 ---
 

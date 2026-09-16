@@ -9,7 +9,7 @@
 
   <name>sqlsage4j</name>
   <description>Java RAG library for text-to-SQL, conversational AI, and LLM experimentation</description>
-  <url>https://github.com/yanimetaxas/sqlsage4j</url>
+  <url>https://github.com/imetaxas/sqlsage4j</url>
 
   <licenses>
     <license>
@@ -21,20 +21,20 @@
   <developers>
     <developer>
       <name>Yani Metaxas</name>
-      <url>https://github.com/yanimetaxas</url>
+      <url>https://github.com/imetaxas</url>
     </developer>
   </developers>
 
   <scm>
-    <connection>scm:git:https://github.com/yanimetaxas/sqlsage4j.git</connection>
-    <developerConnection>scm:git:git@github.com:yanimetaxas/sqlsage4j.git</developerConnection>
+    <connection>scm:git:https://github.com/imetaxas/sqlsage4j.git</connection>
+    <developerConnection>scm:git:git@github.com:imetaxas/sqlsage4j.git</developerConnection>
     <tag>HEAD</tag>
-    <url>https://github.com/yanimetaxas/sqlsage4j</url>
+    <url>https://github.com/imetaxas/sqlsage4j</url>
   </scm>
 
   <issueManagement>
     <system>GitHub Issues</system>
-    <url>https://github.com/yanimetaxas/sqlsage4j/issues</url>
+    <url>https://github.com/imetaxas/sqlsage4j/issues</url>
   </issueManagement>
 
   <properties>

@@ -854,7 +854,7 @@ public LLMClient myCustomClient() {
 ### Build from source
 
 ```bash
-git clone https://github.com/yanimetaxas/sqlsage4j.git
+git clone https://github.com/imetaxas/sqlsage4j.git
 cd sqlsage4j
 mvn compile          # compile + auto-format
 ```
