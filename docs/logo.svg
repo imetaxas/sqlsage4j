@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="sageGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#22c55e"/>
+      <stop offset="50%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#15803d"/>
+    </linearGradient>
+    <linearGradient id="hatGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#5b21b6"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="720" height="200" rx="16" fill="url(#bgGrad)"/>
+
+  <!-- Subtle grid pattern -->
+  <g opacity="0.03" stroke="#fff" stroke-width="0.5">
+    <line x1="0" y1="40" x2="720" y2="40"/>
+    <line x1="0" y1="80" x2="720" y2="80"/>
+    <line x1="0" y1="120" x2="720" y2="120"/>
+    <line x1="0" y1="160" x2="720" y2="160"/>
+  </g>
+
+  <!-- Icon: Sage wizard hat with SQL bracket -->
+  <g transform="translate(60, 100)" filter="shadow">
+    <!-- Wizard hat -->
+    <path d="M-30,30 L0,-45 L30,30 Z" fill="url(#hatGrad)" opacity="0.95"/>
+    <ellipse cx="0" cy="30" rx="38" ry="8" fill="#7c3aed"/>
+    <!-- Hat band -->
+    <rect x="-30" y="22" width="60" height="6" rx="3" fill="#fbbf24"/>
+    <!-- Star on hat -->
+    <polygon points="0,-20 3,-12 11,-12 5,-6 7,2 0,-3 -7,2 -5,-6 -11,-12 -3,-12" fill="#fbbf24" opacity="0.9"/>
+    <!-- SQL bracket left -->
+    <text x="-50" y="8" font-size="48" font-weight="700" fill="url(#accentGrad)" filter="glow" opacity="0.7">{</text>
+    <!-- SQL bracket right -->
+    <text x="32" y="8" font-size="48" font-weight="700" fill="url(#accentGrad)" filter="glow" opacity="0.7">}</text>
+  </g>
+
+  <!-- Text: sqlsage4j -->
+  <g transform="translate(150, 88)">
+    <!-- "sql" part -->
+    <text x="0" y="30" font-size="52" font-weight="800" fill="#3b82f6" letter-spacing="-1">sql</text>
+    <!-- "sage" part -->
+    <text x="105" y="30" font-size="52" font-weight="800" fill="url(#sageGrad)" letter-spacing="-1">sage</text>
+    <!-- "4j" part -->
+    <text x="270" y="30" font-size="52" font-weight="800" fill="#f97316" letter-spacing="-1">4j</text>
+  </g>
+
+  <!-- Tagline -->
+  <text x="150" y="142" font-size="16" fill="#94a3b8" letter-spacing="0.5">Java RAG library for text-to-SQL</text>
+
+  <!-- Java coffee cup icon (small) -->
+  <g transform="translate(432, 124)" opacity="0.5">
+    <rect x="0" y="3" width="12" height="10" rx="1" fill="none" stroke="#f97316" stroke-width="1.5"/>
+    <path d="M12,5 C16,5 16,11 12,11" fill="none" stroke="#f97316" stroke-width="1.5"/>
+    <path d="M3,2 C3,-1 5,-1 5,2" fill="none" stroke="#f97316" stroke-width="1" opacity="0.6"/>
+    <path d="M7,1 C7,-2 9,-2 9,1" fill="none" stroke="#f97316" stroke-width="1" opacity="0.6"/>
+  </g>
+
+  <!-- Accent line -->
+  <rect x="150" y="155" width="200" height="2" rx="1" fill="url(#accentGrad)" opacity="0.4"/>
+</svg>
