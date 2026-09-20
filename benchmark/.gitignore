@@ -1,0 +1,12 @@
+target/
+
+# Local DBs created at runtime
+*.db
+*.sqlite3
+
+# Default report output (see OUTPUT_DIR)
+results/
+
+# Chroma persistent index (UUID dirs + HNSW binaries)
+*-*-*-*-*/
+*.bin

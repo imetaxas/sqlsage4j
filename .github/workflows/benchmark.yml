@@ -1,0 +1,87 @@
+name: Benchmark
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'benchmark/**'
+      - 'src/**'
+      - 'pom.xml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'benchmark/**'
+      - 'src/**'
+      - 'pom.xml'
+  workflow_dispatch:
+    inputs:
+      ollama_model:
+        description: 'Ollama model to use'
+        default: 'llama3.1:8b'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark-compile:
+    name: Benchmark Compile Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: maven
+
+      - name: Install main artifact
+        run: mvn install -DskipTests -q
+
+      - name: Compile benchmark module
+        working-directory: benchmark
+        run: mvn compile -q
+
+  benchmark-run:
+    name: Benchmark (Ollama)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: maven
+
+      - name: Install Ollama
+        run: curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Pull models
+        run: |
+          ollama pull ${{ inputs.ollama_model }}
+          ollama pull nomic-embed-text
+
+      - name: Install main artifact
+        run: mvn install -DskipTests -q
+
+      - name: Package benchmark
+        working-directory: benchmark
+        run: mvn package -q
+
+      - name: Run benchmark
+        working-directory: benchmark
+        env:
+          OLLAMA_MODEL: ${{ inputs.ollama_model }}
+        run: java -jar target/sqlsage4j-benchmark-0.1.0-SNAPSHOT.jar
+
+      - name: Upload benchmark report
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-report
+          path: benchmark/reports/
+          retention-days: 30

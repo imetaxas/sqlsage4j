@@ -1,0 +1,38 @@
+{
+  "ddls": [
+    "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, plan TEXT NOT NULL CHECK (plan IN ('free', 'pro', 'enterprise')), created_at DATE NOT NULL, country TEXT NOT NULL);",
+    "CREATE TABLE orders (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), amount DECIMAL(10,2) NOT NULL, status TEXT NOT NULL CHECK (status IN ('completed', 'refunded', 'pending')), created_at TIMESTAMP NOT NULL);",
+    "CREATE TABLE events (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), event_type TEXT NOT NULL CHECK (event_type IN ('page_view', 'click', 'signup', 'purchase')), page TEXT, created_at TIMESTAMP NOT NULL);",
+    "CREATE TABLE subscriptions (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), plan TEXT NOT NULL CHECK (plan IN ('free', 'pro', 'enterprise')), mrr DECIMAL(10,2) NOT NULL, started_at DATE NOT NULL, cancelled_at DATE);"
+  ],
+  "question_answers": [
+    {"question": "How many users do we have?", "sql": "SELECT COUNT(*) AS user_count FROM users;"},
+    {"question": "What is the total revenue?", "sql": "SELECT SUM(amount) AS total_revenue FROM orders WHERE status = 'completed';"},
+    {"question": "Show all enterprise users.", "sql": "SELECT name, email FROM users WHERE plan = 'enterprise' ORDER BY name;"},
+    {"question": "What is the average order amount by plan?", "sql": "SELECT u.plan, AVG(o.amount) AS avg_order FROM users u JOIN orders o ON u.id = o.user_id GROUP BY u.plan;"},
+    {"question": "Which users have never placed an order?", "sql": "SELECT u.name, u.email FROM users u LEFT JOIN orders o ON u.id = o.user_id WHERE o.id IS NULL;"},
+    {"question": "How many users are on each plan?", "sql": "SELECT plan, COUNT(*) AS user_count FROM users GROUP BY plan ORDER BY user_count DESC;"},
+    {"question": "What are the top customers by total spend?", "sql": "SELECT u.name, SUM(o.amount) AS total_spend FROM users u JOIN orders o ON u.id = o.user_id WHERE o.status = 'completed' GROUP BY u.id, u.name ORDER BY total_spend DESC;"},
+    {"question": "Total MRR from active subscriptions.", "sql": "SELECT SUM(mrr) AS total_mrr FROM subscriptions WHERE cancelled_at IS NULL;"},
+    {"question": "How many page views per page?", "sql": "SELECT page, COUNT(*) AS views FROM events WHERE event_type = 'page_view' GROUP BY page ORDER BY views DESC;"},
+    {"question": "Revenue by country.", "sql": "SELECT u.country, SUM(o.amount) AS revenue FROM users u JOIN orders o ON u.id = o.user_id WHERE o.status = 'completed' GROUP BY u.country ORDER BY revenue DESC;"},
+    {"question": "What is the month-over-month revenue growth?", "sql": "WITH monthly AS (SELECT strftime('%Y-%m', created_at) AS month, SUM(amount) AS revenue FROM orders WHERE status = 'completed' GROUP BY month) SELECT month, revenue, LAG(revenue) OVER (ORDER BY month) AS prev_revenue, ROUND((revenue - LAG(revenue) OVER (ORDER BY month)) * 100.0 / LAG(revenue) OVER (ORDER BY month), 2) AS growth_pct FROM monthly ORDER BY month;"},
+    {"question": "Rank users by total spend.", "sql": "SELECT u.name, SUM(o.amount) AS total_spend, RANK() OVER (ORDER BY SUM(o.amount) DESC) AS spend_rank FROM users u JOIN orders o ON u.id = o.user_id WHERE o.status = 'completed' GROUP BY u.id, u.name ORDER BY spend_rank;"},
+    {"question": "What is the cumulative number of users over time?", "sql": "WITH daily AS (SELECT created_at AS day, COUNT(*) AS new_users FROM users GROUP BY created_at) SELECT day, new_users, SUM(new_users) OVER (ORDER BY day) AS cumulative_users FROM daily ORDER BY day;"},
+    {"question": "How many signups per month?", "sql": "SELECT strftime('%Y-%m', created_at) AS month, COUNT(*) AS signups FROM users GROUP BY month ORDER BY month;"},
+    {"question": "What is the running total of MRR by month?", "sql": "WITH monthly_mrr AS (SELECT strftime('%Y-%m', started_at) AS month, SUM(mrr) AS new_mrr FROM subscriptions WHERE cancelled_at IS NULL GROUP BY month) SELECT month, new_mrr, SUM(new_mrr) OVER (ORDER BY month) AS running_total FROM monthly_mrr ORDER BY month;"},
+    {"question": "What is the cancellation rate by plan?", "sql": "SELECT plan, COUNT(CASE WHEN cancelled_at IS NOT NULL THEN 1 END) * 100.0 / COUNT(*) AS cancel_rate FROM subscriptions GROUP BY plan ORDER BY cancel_rate DESC;"},
+    {"question": "What percentage of revenue does each user contribute?", "sql": "WITH user_revenue AS (SELECT u.name, SUM(o.amount) AS revenue FROM users u JOIN orders o ON u.id = o.user_id WHERE o.status = 'completed' GROUP BY u.id, u.name) SELECT name, revenue, ROUND(revenue * 100.0 / SUM(revenue) OVER (), 2) AS pct_of_total FROM user_revenue ORDER BY revenue DESC;"},
+    {"question": "Compare revenue by quarter.", "sql": "SELECT CASE WHEN CAST(strftime('%m', created_at) AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1' WHEN CAST(strftime('%m', created_at) AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2' WHEN CAST(strftime('%m', created_at) AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3' ELSE 'Q4' END AS quarter, SUM(amount) AS revenue FROM orders WHERE status = 'completed' GROUP BY quarter ORDER BY quarter;"}
+  ],
+  "documentation": [
+    "Revenue means the sum of order amounts where status is 'completed'. Refunded and pending orders do not count toward revenue.",
+    "MRR (Monthly Recurring Revenue) is the sum of the mrr column from active subscriptions (where cancelled_at IS NULL).",
+    "A user is considered active if their subscription has not been cancelled (cancelled_at IS NULL).",
+    "The users table contains the user's current plan. The subscriptions table tracks the full subscription history including cancellations.",
+    "Event types are: page_view (user visited a page), click (user clicked something), signup (user registered), purchase (user completed a purchase).",
+    "SQLite date functions: Use strftime('%Y-%m', col) for year-month, strftime('%Y', col) for year, strftime('%m', col) for month, strftime('%d', col) for day. SQLite does NOT support EXTRACT(), QUARTER, DATE_TRUNC, or DATE_PART. Use JULIANDAY() for date arithmetic (e.g., JULIANDAY(date1) - JULIANDAY(date2) for days between). Use CAST(strftime('%m', col) AS INTEGER) to get numeric month for quarter logic.",
+    "When the question asks about 'revenue', 'spending', or 'total spend', filter by status = 'completed'. When the question asks about order counts, averages, or distributions without mentioning 'completed' or 'successful', include ALL orders regardless of status.",
+    "Use LIKE '%name%' for partial name matching when searching for a specific person by name, since the user may provide only a first name, last name, or partial match."
+  ]
+}

@@ -1,0 +1,2 @@
+io.github.imetaxas.sqlsage4j.spring.SqlSage4jAutoConfiguration
+io.github.imetaxas.sqlsage4j.spring.SqlSage4jHealthAutoConfiguration

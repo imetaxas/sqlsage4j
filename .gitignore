@@ -1,0 +1,33 @@
+# Build output
+/target/
+**/target/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Maven
+dependency-reduced-pom.xml
+
+# Logs
+*.log
+
+# Environment
+.env
+
+# Benchmark run output (regenerated locally)
+benchmark/results/
+benchmark/results-*/
+
+# Local packaging helpers / archives
+*.zip
+sqlsage4j-source.zip
+benchmark/training-data.json
