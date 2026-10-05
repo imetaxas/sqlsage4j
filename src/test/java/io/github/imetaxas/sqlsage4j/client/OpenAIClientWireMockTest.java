@@ -3,7 +3,7 @@ package io.github.imetaxas.sqlsage4j.client;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static io.github.imetaxas.realitycheck.RealityAssertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static io.github.imetaxas.realitycheck.RealityAssertions.assertThatThrownBy;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import io.github.imetaxas.sqlsage4j.ChatMessage;
@@ -86,10 +86,10 @@ final class OpenAIClientWireMockTest {
 
     OpenAIClient client = new OpenAIClient("key", "gpt-4", 0.0, 1024, wm.baseUrl() + "/v1");
 
-    RuntimeException ex =
-        assertThrows(
-            RuntimeException.class, () -> client.submitPrompt(List.of(ChatMessage.user("test"))));
-    assertThat(ex.getCause().getMessage()).contains("429");
+    assertThatThrownBy(() -> client.submitPrompt(List.of(ChatMessage.user("test"))))
+        .isInstanceOf(RuntimeException.class)
+        .cause()
+        .hasMessageContaining("429");
   }
 
   @Test
@@ -100,10 +100,10 @@ final class OpenAIClientWireMockTest {
 
     OpenAIClient client = new OpenAIClient("key", "gpt-4", 0.0, 1024, wm.baseUrl() + "/v1");
 
-    RuntimeException ex =
-        assertThrows(
-            RuntimeException.class, () -> client.submitPrompt(List.of(ChatMessage.user("test"))));
-    assertThat(ex.getCause().getMessage()).contains("500");
+    assertThatThrownBy(() -> client.submitPrompt(List.of(ChatMessage.user("test"))))
+        .isInstanceOf(RuntimeException.class)
+        .cause()
+        .hasMessageContaining("500");
   }
 
   @Test

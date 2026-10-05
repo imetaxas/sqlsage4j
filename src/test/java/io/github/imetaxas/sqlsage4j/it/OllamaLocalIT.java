@@ -1,5 +1,7 @@
 package io.github.imetaxas.sqlsage4j.it;
 
+import static io.github.imetaxas.realitycheck.RealityAssertions.assertThat;
+
 import io.github.imetaxas.sqlsage4j.*;
 import io.github.imetaxas.sqlsage4j.client.OllamaClient;
 import io.github.imetaxas.sqlsage4j.db.DataFrame;
@@ -8,11 +10,16 @@ import io.github.imetaxas.sqlsage4j.enums.PromptEnum;
 import io.github.imetaxas.sqlsage4j.provider.OllamaEmbeddingsProvider;
 import io.github.imetaxas.sqlsage4j.storage.InMemoryEmbeddingsStorage;
 import java.io.File;
+import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.Statement;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.sqlite.SQLiteDataSource;
 
 /**
@@ -21,8 +28,14 @@ import org.sqlite.SQLiteDataSource;
  * <p>Run with: mvn failsafe:integration-test -pl . -Dit.test=OllamaLocalIT
  *
  * <p>Prerequisites: Ollama running on localhost:11434 with llama3.1:8b and nomic-embed-text models.
+ * Disabled via {@link EnabledIf} when the daemon or those models are missing.
  */
+@EnabledIf(
+    value = "ollamaReady",
+    disabledReason = "Ollama is not running or llama3.1:8b / nomic-embed-text are not installed")
 final class OllamaLocalIT {
+
+  private static final Logger logger = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String OLLAMA_URL = "http://localhost:11434";
   private static final String MODEL = "llama3.1:8b";
@@ -30,6 +43,10 @@ final class OllamaLocalIT {
   private static File dbFile;
   private static SQLiteDataSource dataSource;
   private static QueryChat chat;
+
+  static boolean ollamaReady() {
+    return OllamaITSupport.isAvailable(OLLAMA_URL, MODEL, "nomic-embed-text");
+  }
 
   @BeforeAll
   static void setUp() throws Exception {
@@ -88,6 +105,17 @@ final class OllamaLocalIT {
         "SELECT name, price FROM products ORDER BY price DESC LIMIT 1");
   }
 
+  /**
+   * Each test is an independent question. Without this, {@link QueryChat#ask} treats the previous
+   * test's question as conversation context and spends an extra LLM round-trip rewriting the
+   * question against it, which both doubles the runtime and leaks the previous test's subject into
+   * the generated SQL.
+   */
+  @BeforeEach
+  void clearHistory() {
+    chat.history().clear();
+  }
+
   @AfterAll
   static void tearDown() {
     if (dbFile != null) dbFile.delete();
@@ -95,51 +123,51 @@ final class OllamaLocalIT {
 
   @Test
   void askAndRun_countProducts() {
-    QueryResponse response = chat.ask("Count the total number of products in inventory");
-
-    System.out.println("Question: Count the total number of products in inventory");
-    System.out.println("SQL:      " + response.sql());
-    System.out.println("Confidence: " + (int) (response.confidence() * 100) + "%");
-
-    assert response.isSuccess() : "Expected success but got error: " + response.error();
-    assert response.sql().toUpperCase().contains("SELECT")
-        : "Expected SELECT in SQL: " + response.sql();
+    String question = "Count the total number of products in inventory";
+    QueryResponse response = chat.ask(question);
+    logQuery(question, response);
+    assertSuccessfulSelect(response);
 
     DataFrame df = chat.run(response);
-    System.out.println("Result:   " + df.rows().get(0));
-    System.out.println("---");
+    logger.info("Result:     {}", df.rows().get(0));
+    logger.info("---");
   }
 
   @Test
   void askAndRun_mostExpensiveProduct() {
-    QueryResponse response = chat.ask("What is the most expensive product?");
-
-    System.out.println("Question: What is the most expensive product?");
-    System.out.println("SQL:      " + response.sql());
-    System.out.println("Confidence: " + (int) (response.confidence() * 100) + "%");
-
-    assert response.isSuccess() : "Expected success but got error: " + response.error();
+    String question = "What is the most expensive product?";
+    QueryResponse response = chat.ask(question);
+    logQuery(question, response);
+    assertSuccessfulSelect(response);
 
     DataFrame df = chat.run(response);
-    System.out.println("Result:   " + df.rows().get(0));
-    System.out.println("---");
+    logger.info("Result:     {}", df.rows().get(0));
+    logger.info("---");
   }
 
   @Test
   void askAndRun_electronicProducts() {
-    QueryResponse response = chat.ask("List all products in the Electronics category");
-
-    System.out.println("Question: List all products in the Electronics category");
-    System.out.println("SQL:      " + response.sql());
-    System.out.println("Confidence: " + (int) (response.confidence() * 100) + "%");
-
-    assert response.isSuccess() : "Expected success but got error: " + response.error();
-    assert response.sql().toUpperCase().contains("SELECT")
-        : "Expected SELECT in SQL: " + response.sql();
+    String question = "List all products in the Electronics category";
+    QueryResponse response = chat.ask(question);
+    logQuery(question, response);
+    assertSuccessfulSelect(response);
 
     DataFrame df = chat.run(response);
-    System.out.println("Result:   " + df.rows());
-    System.out.println("Rows:     " + df.rowCount());
-    System.out.println("---");
+    logger.info("Result:     {}", df.rows());
+    logger.info("Rows:       {}", df.rowCount());
+    logger.info("---");
+  }
+
+  private static void assertSuccessfulSelect(QueryResponse response) {
+    assertThat(response.isSuccess())
+        .as("expected success but got error: " + response.error())
+        .isTrue();
+    assertThat(response.sql()).isNotNull().containsIgnoringCase("SELECT");
+  }
+
+  private static void logQuery(String question, QueryResponse response) {
+    logger.info("Question:   {}", question);
+    logger.info("SQL:        {}", response.sql());
+    logger.info("Confidence: {}%", (int) (response.confidence() * 100));
   }
 }

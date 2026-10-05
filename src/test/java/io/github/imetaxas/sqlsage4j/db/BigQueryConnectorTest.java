@@ -1,7 +1,7 @@
 package io.github.imetaxas.sqlsage4j.db;
 
 import static io.github.imetaxas.realitycheck.RealityAssertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static io.github.imetaxas.realitycheck.RealityAssertions.assertThatThrownBy;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -85,8 +85,9 @@ final class BigQueryConnectorTest {
 
     BigQueryConnector connector = new BigQueryConnector("test-project", executor);
 
-    RuntimeException ex = assertThrows(RuntimeException.class, () -> connector.runSql("SELECT 1"));
-    assertThat(ex.getMessage()).contains("Connection timeout");
+    assertThatThrownBy(() -> connector.runSql("SELECT 1"))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Connection timeout");
   }
 
   @Test

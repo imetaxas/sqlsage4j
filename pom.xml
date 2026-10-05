@@ -79,6 +79,13 @@
       <artifactId>log4j-api</artifactId>
       <version>${log4j.version}</version>
     </dependency>
+    <!-- Test-scoped only: consumers pick their own Log4j2 binding. -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
@@ -170,6 +177,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
         <configuration>
+          <useIncrementalCompilation>false</useIncrementalCompilation>
           <annotationProcessorPaths>
             <annotationProcessorPath>
               <groupId>com.google.auto.value</groupId>
@@ -242,6 +250,8 @@
         </dependencies>
         <executions>
           <execution>
+            <id>fmt-format</id>
+            <phase>validate</phase>
             <goals>
               <goal>format</goal>
             </goals>

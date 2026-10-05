@@ -80,31 +80,27 @@ public final class BenchmarkRunner {
         } catch (Exception e) {
           logger.error("Framework {} failed during initialization: {}", harness.name(),
               e.getMessage(), e);
-          System.err.println("\n[ERROR] " + harness.name() + " failed: " + e.getMessage());
           if (harness.name().equals("sqlsage4j") && e.getMessage() != null
               && e.getMessage().contains("Embedding")) {
-            System.err.println(
-                "  -> This usually means OPENAI_API_KEY is missing or invalid.");
-            System.err.println(
-                "  -> Set it: export OPENAI_API_KEY=sk-...");
-            System.err.println(
-                "  -> Or use Ollama: --base-url http://localhost:11434 --model llama3");
+            logger.error(
+                "This usually means OPENAI_API_KEY is missing or invalid. "
+                    + "Set it with export OPENAI_API_KEY=sk-... "
+                    + "or use Ollama: --base-url http://localhost:11434 --model llama3");
           }
           if (harness.name().equals("vanna")) {
-            System.err.println(
-                "  -> Ensure Vanna is installed: pip install 'vanna[openai,chromadb]'");
-            System.err.println(
-                "  -> Or run with --sqlsage4j-only to skip Vanna");
+            logger.error(
+                "Ensure Vanna is installed: pip install 'vanna[openai,chromadb]' "
+                    + "— or run with --sqlsage4j-only to skip Vanna");
           }
         }
       }
 
       if (allResults.isEmpty()) {
-        System.err.println("\n[ERROR] No results collected. All frameworks failed.");
-        System.err.println("Prerequisites:");
-        System.err.println("  1. export OPENAI_API_KEY=sk-...  (or use --base-url for Ollama)");
-        System.err.println("  2. pip install 'vanna[ollama]' langchain langchain-community "
-            + "langchain-ollama langchain-experimental");
+        logger.error(
+            "No results collected. All frameworks failed. Prerequisites: "
+                + "(1) export OPENAI_API_KEY=sk-...  (or use --base-url for Ollama) "
+                + "(2) pip install 'vanna[ollama]' langchain langchain-community "
+                + "langchain-ollama langchain-experimental");
         System.exit(1);
       }
 
@@ -130,7 +126,7 @@ public final class BenchmarkRunner {
 
       logger.info("Benchmark complete. {} framework(s), {} total results written to {}",
           successfulFrameworks, allResults.size(), config.outputDir());
-      System.out.println("\n" + report);
+      logger.info("{}", report);
     } catch (Exception e) {
       logger.error("Benchmark failed: {}", e.getMessage(), e);
       System.exit(1);
@@ -169,16 +165,16 @@ public final class BenchmarkRunner {
     }
 
     if (!errors.isEmpty()) {
-      System.err.println("\n=== Preflight Check Failed ===\n");
+      logger.error("=== Preflight Check Failed ===");
       for (int i = 0; i < errors.size(); i++) {
-        System.err.println("  " + (i + 1) + ". " + errors.get(i));
+        logger.error("{}. {}", i + 1, errors.get(i));
       }
-      System.err.println("\nUsage:");
-      System.err.println("  export OPENAI_API_KEY=sk-...");
-      System.err.println("  java -jar sqlsage4j-benchmark.jar [--sqlsage4j-only] [--model gpt-4o]");
-      System.err.println("\nFor Ollama:");
-      System.err.println("  java -jar sqlsage4j-benchmark.jar --base-url http://localhost:11434 "
-          + "--model llama3 --sqlsage4j-only");
+      logger.error(
+          "Usage: export OPENAI_API_KEY=sk-... ; "
+              + "java -jar sqlsage4j-benchmark.jar [--sqlsage4j-only] [--model gpt-4o]");
+      logger.error(
+          "For Ollama: java -jar sqlsage4j-benchmark.jar --base-url http://localhost:11434 "
+              + "--model llama3 --sqlsage4j-only");
       System.exit(1);
     }
   }

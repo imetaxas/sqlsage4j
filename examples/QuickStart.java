@@ -1,6 +1,8 @@
 import io.github.imetaxas.sqlsage4j.*;
 import io.github.imetaxas.sqlsage4j.db.SQLiteConnector;
 import io.github.imetaxas.sqlsage4j.enums.PromptEnum;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Minimal sqlsage4j example — ask a question in English, get SQL + results.
@@ -12,6 +14,8 @@ import io.github.imetaxas.sqlsage4j.enums.PromptEnum;
  * Run: javac -cp sqlsage4j-0.1.0.jar QuickStart.java && java -cp .:sqlsage4j-0.1.0.jar QuickStart
  */
 public class QuickStart {
+
+  private static final Logger logger = LogManager.getLogger(QuickStart.class);
 
   public static void main(String[] args) {
     // 1. Point at your database
@@ -34,11 +38,11 @@ public class QuickStart {
 
     // 4. Ask a question in plain English
     var response = chat.ask("What are the top 5 artists by number of albums?");
-    System.out.println("SQL: " + response.sql());
-    System.out.println("Confidence: " + (int)(response.confidence() * 100) + "%");
+    logger.info("SQL: {}", response.sql());
+    logger.info("Confidence: {}%", (int) (response.confidence() * 100));
 
-    // 5. Execute and print results
+    // 5. Execute and log results
     var results = chat.run(response);
-    System.out.println(results.toText());
+    logger.info("{}", results.toText());
   }
 }

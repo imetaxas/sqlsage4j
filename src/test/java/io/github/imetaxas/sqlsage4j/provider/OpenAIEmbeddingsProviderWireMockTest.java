@@ -3,7 +3,7 @@ package io.github.imetaxas.sqlsage4j.provider;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static io.github.imetaxas.realitycheck.RealityAssertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static io.github.imetaxas.realitycheck.RealityAssertions.assertThatThrownBy;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import org.junit.jupiter.api.Test;
@@ -72,9 +72,10 @@ final class OpenAIEmbeddingsProviderWireMockTest {
     OpenAIEmbeddingsProvider provider =
         new OpenAIEmbeddingsProvider("bad-key", "text-embedding-3-small", wm.baseUrl() + "/v1");
 
-    RuntimeException ex =
-        assertThrows(RuntimeException.class, () -> provider.generateEmbedding("test"));
-    assertThat(ex.getCause().getMessage()).contains("401");
+    assertThatThrownBy(() -> provider.generateEmbedding("test"))
+        .isInstanceOf(RuntimeException.class)
+        .cause()
+        .hasMessageContaining("401");
   }
 
   @Test
@@ -89,9 +90,10 @@ final class OpenAIEmbeddingsProviderWireMockTest {
     OpenAIEmbeddingsProvider provider =
         new OpenAIEmbeddingsProvider("key", "text-embedding-3-small", wm.baseUrl() + "/v1");
 
-    RuntimeException ex =
-        assertThrows(RuntimeException.class, () -> provider.generateEmbedding("test"));
-    assertThat(ex.getCause().getMessage()).contains("429");
+    assertThatThrownBy(() -> provider.generateEmbedding("test"))
+        .isInstanceOf(RuntimeException.class)
+        .cause()
+        .hasMessageContaining("429");
   }
 
   @Test

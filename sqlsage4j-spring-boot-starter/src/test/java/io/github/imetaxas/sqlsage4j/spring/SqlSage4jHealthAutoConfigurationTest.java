@@ -1,6 +1,6 @@
 package io.github.imetaxas.sqlsage4j.spring;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static io.github.imetaxas.realitycheck.spring.SpringReality.assertThatContext;
 
 import io.github.imetaxas.sqlsage4j.ChatMessage;
 import io.github.imetaxas.sqlsage4j.client.LLMClient;
@@ -30,8 +30,8 @@ class SqlSage4jHealthAutoConfigurationTest {
             "management.health.sqlsage4j.enabled=true")
         .run(
             context -> {
-              assertThat(context).hasSingleBean(SqlSage4jHealthIndicator.class);
-              assertThat(context).hasSingleBean(HealthIndicator.class);
+              assertThatContext(context).hasSingleBean(SqlSage4jHealthIndicator.class);
+              assertThatContext(context).hasSingleBean(HealthIndicator.class);
             });
   }
 
@@ -45,7 +45,7 @@ class SqlSage4jHealthAutoConfigurationTest {
             "sqlsage4j.embeddings.provider=noop",
             "sqlsage4j.storage.type=bm25",
             "management.health.sqlsage4j.enabled=false")
-        .run(context -> assertThat(context).doesNotHaveBean(SqlSage4jHealthIndicator.class));
+        .run(context -> assertThatContext(context).doesNotHaveBean(SqlSage4jHealthIndicator.class));
   }
 
   @Test
@@ -72,6 +72,6 @@ class SqlSage4jHealthAutoConfigurationTest {
             "sqlsage4j.storage.type=bm25",
             "management.health.sqlsage4j.enabled=true")
         .withBean(SqlSage4jHealthIndicator.class, () -> new SqlSage4jHealthIndicator(client))
-        .run(context -> assertThat(context).hasSingleBean(SqlSage4jHealthIndicator.class));
+        .run(context -> assertThatContext(context).hasSingleBean(SqlSage4jHealthIndicator.class));
   }
 }

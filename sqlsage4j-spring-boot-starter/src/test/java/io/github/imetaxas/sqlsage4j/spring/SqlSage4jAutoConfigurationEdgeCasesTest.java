@@ -1,6 +1,7 @@
 package io.github.imetaxas.sqlsage4j.spring;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static io.github.imetaxas.realitycheck.RealityAssertions.assertThat;
+import static io.github.imetaxas.realitycheck.spring.SpringReality.assertThatContext;
 
 import io.github.imetaxas.sqlsage4j.client.LLMClient;
 import io.github.imetaxas.sqlsage4j.provider.EmbeddingsProvider;
@@ -25,11 +26,10 @@ class SqlSage4jAutoConfigurationEdgeCasesTest {
             "sqlsage4j.storage.type=lsh",
             "sqlsage4j.embeddings.provider=noop")
         .run(
-            context -> {
-              EmbeddingsStorage storage = context.getBean(EmbeddingsStorage.class);
-              assertThat(storage)
-                  .isInstanceOf(io.github.imetaxas.sqlsage4j.storage.LSHEmbeddingsStorage.class);
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(EmbeddingsStorage.class)
+                    .isInstanceOf(io.github.imetaxas.sqlsage4j.storage.LSHEmbeddingsStorage.class));
   }
 
   @Test
@@ -43,12 +43,11 @@ class SqlSage4jAutoConfigurationEdgeCasesTest {
             "sqlsage4j.embeddings.api-key=sk-embed-key",
             "sqlsage4j.embeddings.model=text-embedding-ada-002")
         .run(
-            context -> {
-              assertThat(context).hasSingleBean(EmbeddingsProvider.class);
-              assertThat(context.getBean(EmbeddingsProvider.class))
-                  .isInstanceOf(
-                      io.github.imetaxas.sqlsage4j.provider.OpenAIEmbeddingsProvider.class);
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(EmbeddingsProvider.class)
+                    .isInstanceOf(
+                        io.github.imetaxas.sqlsage4j.provider.OpenAIEmbeddingsProvider.class));
   }
 
   @Test
@@ -60,12 +59,11 @@ class SqlSage4jAutoConfigurationEdgeCasesTest {
             "sqlsage4j.max-tokens=1024",
             "sqlsage4j.embeddings.provider=openai")
         .run(
-            context -> {
-              assertThat(context).hasSingleBean(EmbeddingsProvider.class);
-              assertThat(context.getBean(EmbeddingsProvider.class))
-                  .isInstanceOf(
-                      io.github.imetaxas.sqlsage4j.provider.OpenAIEmbeddingsProvider.class);
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(EmbeddingsProvider.class)
+                    .isInstanceOf(
+                        io.github.imetaxas.sqlsage4j.provider.OpenAIEmbeddingsProvider.class));
   }
 
   @Test
@@ -77,12 +75,11 @@ class SqlSage4jAutoConfigurationEdgeCasesTest {
             "sqlsage4j.max-tokens=1024",
             "sqlsage4j.embeddings.provider=ollama")
         .run(
-            context -> {
-              assertThat(context).hasSingleBean(EmbeddingsProvider.class);
-              assertThat(context.getBean(EmbeddingsProvider.class))
-                  .isInstanceOf(
-                      io.github.imetaxas.sqlsage4j.provider.OllamaEmbeddingsProvider.class);
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(EmbeddingsProvider.class)
+                    .isInstanceOf(
+                        io.github.imetaxas.sqlsage4j.provider.OllamaEmbeddingsProvider.class));
   }
 
   @Test
@@ -96,11 +93,10 @@ class SqlSage4jAutoConfigurationEdgeCasesTest {
             "sqlsage4j.embeddings.provider=noop",
             "sqlsage4j.storage.type=bm25")
         .run(
-            context -> {
-              assertThat(context).hasSingleBean(LLMClient.class);
-              LLMClient client = context.getBean(LLMClient.class);
-              assertThat(client.modelName()).isEqualTo("custom");
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(LLMClient.class)
+                    .satisfies(client -> assertThat(client.modelName()).isEqualTo("custom")));
   }
 
   @Test
@@ -113,11 +109,10 @@ class SqlSage4jAutoConfigurationEdgeCasesTest {
             "sqlsage4j.embeddings.provider=noop",
             "sqlsage4j.storage.type=bm25")
         .run(
-            context -> {
-              assertThat(context).hasSingleBean(LLMClient.class);
-              LLMClient client = context.getBean(LLMClient.class);
-              assertThat(client.modelName()).isEqualTo("gpt-4o");
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(LLMClient.class)
+                    .satisfies(client -> assertThat(client.modelName()).isEqualTo("gpt-4o")));
   }
 
   @Test
@@ -137,11 +132,11 @@ class SqlSage4jAutoConfigurationEdgeCasesTest {
             "sqlsage4j.embeddings.provider=none",
             "sqlsage4j.storage.type=bm25")
         .run(
-            context -> {
-              EmbeddingsProvider provider = context.getBean(EmbeddingsProvider.class);
-              assertThat(provider)
-                  .isInstanceOf(io.github.imetaxas.sqlsage4j.provider.NoOpEmbeddingsProvider.class);
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(EmbeddingsProvider.class)
+                    .isInstanceOf(
+                        io.github.imetaxas.sqlsage4j.provider.NoOpEmbeddingsProvider.class));
   }
 
   @Test
@@ -154,10 +149,10 @@ class SqlSage4jAutoConfigurationEdgeCasesTest {
             "sqlsage4j.embeddings.provider=bm25",
             "sqlsage4j.storage.type=bm25")
         .run(
-            context -> {
-              EmbeddingsProvider provider = context.getBean(EmbeddingsProvider.class);
-              assertThat(provider)
-                  .isInstanceOf(io.github.imetaxas.sqlsage4j.provider.NoOpEmbeddingsProvider.class);
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(EmbeddingsProvider.class)
+                    .isInstanceOf(
+                        io.github.imetaxas.sqlsage4j.provider.NoOpEmbeddingsProvider.class));
   }
 }

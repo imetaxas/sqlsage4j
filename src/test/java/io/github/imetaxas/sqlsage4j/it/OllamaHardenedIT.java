@@ -1,5 +1,7 @@
 package io.github.imetaxas.sqlsage4j.it;
 
+import static io.github.imetaxas.realitycheck.RealityAssertions.assertThat;
+
 import io.github.imetaxas.sqlsage4j.*;
 import io.github.imetaxas.sqlsage4j.client.OllamaClient;
 import io.github.imetaxas.sqlsage4j.db.DataFrame;
@@ -11,11 +13,16 @@ import io.github.imetaxas.sqlsage4j.storage.BM25Storage;
 import io.github.imetaxas.sqlsage4j.storage.HybridEmbeddingsStorage;
 import io.github.imetaxas.sqlsage4j.storage.InMemoryEmbeddingsStorage;
 import java.io.File;
+import java.lang.invoke.MethodHandles;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.sqlite.SQLiteDataSource;
 
 /**
@@ -32,9 +39,17 @@ import org.sqlite.SQLiteDataSource;
  * </ol>
  *
  * Run: mvn test-compile -pl . -q && mvn failsafe:integration-test -pl . -Dit.test=OllamaHardenedIT
+ *
+ * <p>Disabled via {@link EnabledIf} when Ollama is not running or llama3.1:8b / nomic-embed-text
+ * are not installed.
  */
+@EnabledIf(
+    value = "ollamaReady",
+    disabledReason = "Ollama is not running or llama3.1:8b / nomic-embed-text are not installed")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 final class OllamaHardenedIT {
+
+  private static final Logger logger = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String OLLAMA_URL = "http://localhost:11434";
   private static final String MODEL = "llama3.1:8b";
@@ -43,6 +58,10 @@ final class OllamaHardenedIT {
   private static SQLiteDataSource dataSource;
   private static QueryChat chat;
   private static final List<TestResult> results = new ArrayList<>();
+
+  static boolean ollamaReady() {
+    return OllamaITSupport.isAvailable(OLLAMA_URL, MODEL, "nomic-embed-text");
+  }
 
   record TestResult(
       String question,
@@ -191,7 +210,9 @@ final class OllamaHardenedIT {
   @AfterAll
   static void tearDown() {
     if (dbFile != null) dbFile.delete();
-    printSummary();
+    if (!results.isEmpty()) {
+      printSummary();
+    }
   }
 
   // ─── Test Questions (varied phrasing, not exact matches to training) ───
@@ -270,12 +291,12 @@ final class OllamaHardenedIT {
     boolean correct = false;
     String resultStr = "";
 
-    System.out.printf("Q: %s%n", question);
-    System.out.printf("   SQL: %s%n", sql);
-    System.out.printf("   Confidence: %d%%%n", (int) (confidence * 100));
+    logger.info("Q: {}", question);
+    logger.info("   SQL: {}", sql);
+    logger.info("   Confidence: {}%", (int) (confidence * 100));
 
     if (!response.isSuccess()) {
-      System.out.printf("   ERROR: %s%n", response.error());
+      logger.info("   ERROR: {}", response.error());
       resultStr = "ERROR: " + response.error();
     } else if (sql != null && sql.toUpperCase().contains("SELECT")) {
       try {
@@ -283,54 +304,70 @@ final class OllamaHardenedIT {
         resultStr = df.rows().toString();
         executed = true;
         correct = resultStr.contains(expectedContains);
-        System.out.printf("   Result: %s%n", resultStr);
-        System.out.printf(
-            "   Expected to contain: %s → %s%n", expectedContains, correct ? "CORRECT" : "WRONG");
+        logger.info("   Result: {}", resultStr);
+        logger.info(
+            "   Expected to contain: {} → {}", expectedContains, correct ? "CORRECT" : "WRONG");
       } catch (Exception e) {
         resultStr = "EXEC FAILED: " + e.getMessage();
-        System.out.printf("   EXEC FAILED: %s%n", e.getMessage());
+        logger.info("   EXEC FAILED: {}", e.getMessage());
       }
     } else {
       resultStr = "NO SQL GENERATED";
-      System.out.printf("   NO SQL GENERATED%n");
+      logger.info("   NO SQL GENERATED");
     }
-    System.out.println();
+    logger.info("");
     results.add(new TestResult(question, sql, confidence, resultStr, executed, correct));
+
+    assertThat(response.isSuccess())
+        .as("expected success but got error: " + response.error())
+        .isTrue();
+    assertThat(sql).isNotNull().containsIgnoringCase("SELECT");
+    assertThat(executed).as("SQL execution failed: " + resultStr).isTrue();
+    assertThat(resultStr).contains(expectedContains);
   }
 
   private static void printSummary() {
-    System.out.println("\n═══════════════════════════════════════════════════════════════════");
-    System.out.println("  HARDENED OLLAMA TEST SUMMARY (llama3.1:8b)");
-    System.out.println("═══════════════════════════════════════════════════════════════════");
+    logger.info("");
+    logger.info("═══════════════════════════════════════════════════════════════════");
+    logger.info("  HARDENED OLLAMA TEST SUMMARY ({})", MODEL);
+    logger.info("═══════════════════════════════════════════════════════════════════");
     int executed = 0;
     int correct = 0;
     for (TestResult r : results) {
       String exec = r.executed ? "EXEC" : "FAIL";
       String corr = r.correct ? "CORRECT" : "WRONG";
-      System.out.printf("  [%s][%s] %s%n", exec, corr, r.question);
+      logger.info("  [{}][{}] {}", exec, corr, r.question);
       if (r.executed) executed++;
       if (r.correct) correct++;
     }
-    System.out.println("───────────────────────────────────────────────────────────────────");
-    System.out.printf(
-        "  Execution rate: %d/%d (%.0f%%)%n",
-        executed, results.size(), 100.0 * executed / results.size());
-    System.out.printf(
-        "  Answer accuracy: %d/%d (%.0f%%)%n",
-        correct, results.size(), 100.0 * correct / results.size());
-    System.out.printf(
-        "  Avg confidence: %.0f%%%n",
+    logger.info("───────────────────────────────────────────────────────────────────");
+    logger.printf(
+        Level.INFO,
+        "  Execution rate: %d/%d (%.0f%%)",
+        executed,
+        results.size(),
+        100.0 * executed / results.size());
+    logger.printf(
+        Level.INFO,
+        "  Answer accuracy: %d/%d (%.0f%%)",
+        correct,
+        results.size(),
+        100.0 * correct / results.size());
+    logger.printf(
+        Level.INFO,
+        "  Avg confidence: %.0f%%",
         results.stream().mapToDouble(TestResult::confidence).average().orElse(0) * 100);
-    System.out.println("───────────────────────────────────────────────────────────────────");
-    System.out.println("  Model: " + MODEL);
-    System.out.println("  Hardening steps applied:");
-    System.out.println("    1. 15 golden Q&A examples (diverse patterns)");
-    System.out.println("    2. Domain documentation training");
-    System.out.println("    3. Auto-schema introspection (FK relationships)");
-    System.out.println("    4. Temperature = 0 (deterministic)");
-    System.out.println("    5. SQL validation + self-correction");
-    System.out.println("    6. Hybrid search (70% vector + 30% BM25)");
-    System.out.println("    7. SQL safety guardrails");
-    System.out.println("═══════════════════════════════════════════════════════════════════\n");
+    logger.info("───────────────────────────────────────────────────────────────────");
+    logger.info("  Model: {}", MODEL);
+    logger.info("  Hardening steps applied:");
+    logger.info("    1. 15 golden Q&A examples (diverse patterns)");
+    logger.info("    2. Domain documentation training");
+    logger.info("    3. Auto-schema introspection (FK relationships)");
+    logger.info("    4. Temperature = 0 (deterministic)");
+    logger.info("    5. SQL validation + self-correction");
+    logger.info("    6. Hybrid search (70% vector + 30% BM25)");
+    logger.info("    7. SQL safety guardrails");
+    logger.info("═══════════════════════════════════════════════════════════════════");
+    logger.info("");
   }
 }

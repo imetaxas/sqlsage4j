@@ -1,6 +1,7 @@
 package io.github.imetaxas.sqlsage4j.spring;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static io.github.imetaxas.realitycheck.RealityAssertions.assertThat;
+import static io.github.imetaxas.realitycheck.spring.SpringReality.assertThatContext;
 
 import io.github.imetaxas.sqlsage4j.QueryChat;
 import io.github.imetaxas.sqlsage4j.SqlSage4j;
@@ -29,12 +30,12 @@ class SqlSage4jAutoConfigurationTest {
             "sqlsage4j.embeddings.base-url=http://localhost:11434")
         .run(
             context -> {
-              assertThat(context).hasSingleBean(SqlSage4jProperties.class);
-              assertThat(context).hasSingleBean(EmbeddingsProvider.class);
-              assertThat(context).hasSingleBean(EmbeddingsStorage.class);
-              assertThat(context).hasSingleBean(LLMClient.class);
-              assertThat(context).hasSingleBean(SqlSage4j.class);
-              assertThat(context).hasSingleBean(QueryChat.class);
+              assertThatContext(context).hasSingleBean(SqlSage4jProperties.class);
+              assertThatContext(context).hasSingleBean(EmbeddingsProvider.class);
+              assertThatContext(context).hasSingleBean(EmbeddingsStorage.class);
+              assertThatContext(context).hasSingleBean(LLMClient.class);
+              assertThatContext(context).hasSingleBean(SqlSage4j.class);
+              assertThatContext(context).hasSingleBean(QueryChat.class);
             });
   }
 
@@ -44,9 +45,9 @@ class SqlSage4jAutoConfigurationTest {
         .withPropertyValues("sqlsage4j.enabled=false", "sqlsage4j.model-name=gpt-4")
         .run(
             context -> {
-              assertThat(context).doesNotHaveBean(SqlSage4j.class);
-              assertThat(context).doesNotHaveBean(QueryChat.class);
-              assertThat(context).doesNotHaveBean(LLMClient.class);
+              assertThatContext(context).doesNotHaveBean(SqlSage4j.class);
+              assertThatContext(context).doesNotHaveBean(QueryChat.class);
+              assertThatContext(context).doesNotHaveBean(LLMClient.class);
             });
   }
 
@@ -61,11 +62,10 @@ class SqlSage4jAutoConfigurationTest {
             "sqlsage4j.embeddings.provider=openai",
             "sqlsage4j.embeddings.api-key=sk-test")
         .run(
-            context -> {
-              assertThat(context).hasSingleBean(LLMClient.class);
-              LLMClient client = context.getBean(LLMClient.class);
-              assertThat(client.modelName()).isEqualTo("gpt-4o");
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(LLMClient.class)
+                    .satisfies(client -> assertThat(client.modelName()).isEqualTo("gpt-4o")));
   }
 
   @Test
@@ -78,11 +78,10 @@ class SqlSage4jAutoConfigurationTest {
             "sqlsage4j.embeddings.provider=ollama",
             "sqlsage4j.embeddings.base-url=http://localhost:11434")
         .run(
-            context -> {
-              assertThat(context).hasSingleBean(LLMClient.class);
-              LLMClient client = context.getBean(LLMClient.class);
-              assertThat(client.modelName()).isEqualTo("llama3");
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(LLMClient.class)
+                    .satisfies(client -> assertThat(client.modelName()).isEqualTo("llama3")));
   }
 
   @Test
@@ -95,12 +94,11 @@ class SqlSage4jAutoConfigurationTest {
             "sqlsage4j.embeddings.provider=ollama",
             "sqlsage4j.embeddings.base-url=http://localhost:11434")
         .run(
-            context -> {
-              EmbeddingsStorage storage = context.getBean(EmbeddingsStorage.class);
-              assertThat(storage)
-                  .isInstanceOf(
-                      io.github.imetaxas.sqlsage4j.storage.InMemoryEmbeddingsStorage.class);
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(EmbeddingsStorage.class)
+                    .isInstanceOf(
+                        io.github.imetaxas.sqlsage4j.storage.InMemoryEmbeddingsStorage.class));
   }
 
   @Test
@@ -113,11 +111,10 @@ class SqlSage4jAutoConfigurationTest {
             "sqlsage4j.storage.type=bm25",
             "sqlsage4j.embeddings.provider=noop")
         .run(
-            context -> {
-              EmbeddingsStorage storage = context.getBean(EmbeddingsStorage.class);
-              assertThat(storage)
-                  .isInstanceOf(io.github.imetaxas.sqlsage4j.storage.BM25Storage.class);
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(EmbeddingsStorage.class)
+                    .isInstanceOf(io.github.imetaxas.sqlsage4j.storage.BM25Storage.class));
   }
 
   @Test
@@ -131,11 +128,11 @@ class SqlSage4jAutoConfigurationTest {
             "sqlsage4j.embeddings.provider=ollama",
             "sqlsage4j.embeddings.base-url=http://localhost:11434")
         .run(
-            context -> {
-              EmbeddingsStorage storage = context.getBean(EmbeddingsStorage.class);
-              assertThat(storage)
-                  .isInstanceOf(io.github.imetaxas.sqlsage4j.storage.HnswEmbeddingsStorage.class);
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(EmbeddingsStorage.class)
+                    .isInstanceOf(
+                        io.github.imetaxas.sqlsage4j.storage.HnswEmbeddingsStorage.class));
   }
 
   @Test
@@ -148,11 +145,11 @@ class SqlSage4jAutoConfigurationTest {
             "sqlsage4j.embeddings.provider=noop",
             "sqlsage4j.storage.type=bm25")
         .run(
-            context -> {
-              EmbeddingsProvider provider = context.getBean(EmbeddingsProvider.class);
-              assertThat(provider)
-                  .isInstanceOf(io.github.imetaxas.sqlsage4j.provider.NoOpEmbeddingsProvider.class);
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(EmbeddingsProvider.class)
+                    .isInstanceOf(
+                        io.github.imetaxas.sqlsage4j.provider.NoOpEmbeddingsProvider.class));
   }
 
   @Test
@@ -166,11 +163,14 @@ class SqlSage4jAutoConfigurationTest {
             "sqlsage4j.embeddings.provider=noop",
             "sqlsage4j.storage.type=bm25")
         .run(
-            context -> {
-              SqlGuard guard = context.getBean(SqlGuard.class);
-              assertThat(guard.check("DROP TABLE x").blocked()).isTrue();
-              assertThat(guard.check("SELECT 1").blocked()).isFalse();
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(SqlGuard.class)
+                    .satisfies(
+                        guard -> {
+                          assertThat(guard.check("DROP TABLE x").blocked()).isTrue();
+                          assertThat(guard.check("SELECT 1").blocked()).isFalse();
+                        }));
   }
 
   @Test
@@ -183,10 +183,11 @@ class SqlSage4jAutoConfigurationTest {
             "sqlsage4j.embeddings.provider=noop",
             "sqlsage4j.storage.type=bm25")
         .run(
-            context -> {
-              SqlGuard guard = context.getBean(SqlGuard.class);
-              assertThat(guard.check("DROP TABLE x").blocked()).isFalse();
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(SqlGuard.class)
+                    .satisfies(
+                        guard -> assertThat(guard.check("DROP TABLE x").blocked()).isFalse()));
   }
 
   @Test
@@ -214,10 +215,10 @@ class SqlSage4jAutoConfigurationTest {
                   }
                 })
         .run(
-            context -> {
-              assertThat(context).hasSingleBean(LLMClient.class);
-              assertThat(context.getBean(LLMClient.class).modelName()).isEqualTo("custom-model");
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(LLMClient.class)
+                    .satisfies(client -> assertThat(client.modelName()).isEqualTo("custom-model")));
   }
 
   @Test
@@ -230,11 +231,10 @@ class SqlSage4jAutoConfigurationTest {
             "sqlsage4j.embeddings.provider=noop")
         .withBean(EmbeddingsStorage.class, io.github.imetaxas.sqlsage4j.storage.BM25Storage::new)
         .run(
-            context -> {
-              assertThat(context).hasSingleBean(EmbeddingsStorage.class);
-              assertThat(context.getBean(EmbeddingsStorage.class))
-                  .isInstanceOf(io.github.imetaxas.sqlsage4j.storage.BM25Storage.class);
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(EmbeddingsStorage.class)
+                    .isInstanceOf(io.github.imetaxas.sqlsage4j.storage.BM25Storage.class));
   }
 
   @Test
@@ -249,11 +249,11 @@ class SqlSage4jAutoConfigurationTest {
             EmbeddingsProvider.class,
             io.github.imetaxas.sqlsage4j.provider.NoOpEmbeddingsProvider::new)
         .run(
-            context -> {
-              assertThat(context).hasSingleBean(EmbeddingsProvider.class);
-              assertThat(context.getBean(EmbeddingsProvider.class))
-                  .isInstanceOf(io.github.imetaxas.sqlsage4j.provider.NoOpEmbeddingsProvider.class);
-            });
+            context ->
+                assertThatContext(context)
+                    .bean(EmbeddingsProvider.class)
+                    .isInstanceOf(
+                        io.github.imetaxas.sqlsage4j.provider.NoOpEmbeddingsProvider.class));
   }
 
   @Test
@@ -262,8 +262,8 @@ class SqlSage4jAutoConfigurationTest {
         .withPropertyValues("sqlsage4j.max-tokens=1024")
         .run(
             context -> {
-              assertThat(context).doesNotHaveBean(SqlSage4j.class);
-              assertThat(context).doesNotHaveBean(QueryChat.class);
+              assertThatContext(context).doesNotHaveBean(SqlSage4j.class);
+              assertThatContext(context).doesNotHaveBean(QueryChat.class);
             });
   }
 }

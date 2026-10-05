@@ -24,6 +24,7 @@
     <spring-boot.version>3.4.1</spring-boot.version>
     <sqlsage4j.version>0.1.0-SNAPSHOT</sqlsage4j.version>
     <google-java-format.version>1.28.0</google-java-format.version>
+    <realitycheck.version>1.0.0-SNAPSHOT</realitycheck.version>
   </properties>
 
   <dependencyManagement>
@@ -32,6 +33,13 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.github.imetaxas</groupId>
+        <artifactId>realitycheck-bom</artifactId>
+        <version>${realitycheck.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -69,6 +77,21 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.github.imetaxas</groupId>
+      <artifactId>realitycheck-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.github.imetaxas</groupId>
+      <artifactId>realitycheck-junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.github.imetaxas</groupId>
+      <artifactId>realitycheck-spring</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

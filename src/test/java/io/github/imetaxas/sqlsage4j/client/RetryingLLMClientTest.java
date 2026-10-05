@@ -1,7 +1,7 @@
 package io.github.imetaxas.sqlsage4j.client;
 
 import static io.github.imetaxas.realitycheck.RealityAssertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static io.github.imetaxas.realitycheck.RealityAssertions.assertThatThrownBy;
 
 import io.github.imetaxas.sqlsage4j.ChatMessage;
 import java.time.Duration;
@@ -74,11 +74,9 @@ final class RetryingLLMClientTest {
             .initialDelay(Duration.ofMillis(10))
             .build();
 
-    RuntimeException ex =
-        assertThrows(
-            RuntimeException.class, () -> client.submitPrompt(List.of(ChatMessage.user("test"))));
-
-    assertThat(ex.getMessage()).contains("failed after 2 attempts");
+    assertThatThrownBy(() -> client.submitPrompt(List.of(ChatMessage.user("test"))))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("failed after 2 attempts");
   }
 
   @Test
@@ -104,8 +102,11 @@ final class RetryingLLMClientTest {
             .initialDelay(Duration.ofMillis(10))
             .build();
 
-    assertThrows(
-        RuntimeException.class, () -> client.submitPrompt(List.of(ChatMessage.user("test"))));
+    assertThatThrownBy(() -> client.submitPrompt(List.of(ChatMessage.user("test"))))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("failed after 5 attempts")
+        .cause()
+        .hasMessageContaining("Invalid API key");
     assertThat(attempts.get()).isEqualTo(1);
   }
 

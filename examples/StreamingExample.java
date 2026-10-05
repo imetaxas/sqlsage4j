@@ -2,6 +2,8 @@ import io.github.imetaxas.sqlsage4j.*;
 import io.github.imetaxas.sqlsage4j.client.OllamaStreamingClient;
 import io.github.imetaxas.sqlsage4j.db.SQLiteConnector;
 import io.github.imetaxas.sqlsage4j.enums.PromptEnum;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Streaming example — see SQL tokens arrive in real-time.
@@ -9,6 +11,8 @@ import io.github.imetaxas.sqlsage4j.enums.PromptEnum;
  * Prerequisites: Ollama running with llama3.1:8b and nomic-embed-text models.
  */
 public class StreamingExample {
+
+  private static final Logger logger = LogManager.getLogger(StreamingExample.class);
 
   public static void main(String[] args) {
     var streamingClient = new OllamaStreamingClient(
@@ -27,17 +31,18 @@ public class StreamingExample {
     var chat = sage.queryChat();
     chat.trainDdl("CREATE TABLE tracks (TrackId INT, Name TEXT, AlbumId INT, Milliseconds INT)");
 
-    // Stream tokens to stdout as they arrive
-    System.out.print("Generating SQL: ");
-    var response = chat.askStreaming("What is the longest track?", token -> {
-      if (!token.finished()) {
-        System.out.print(token.text());
-      }
-    });
-    System.out.println("\n\nFinal SQL: " + response.sql());
+    logger.info("Generating SQL (streaming)");
+    var response =
+        chat.askStreaming(
+            "What is the longest track?",
+            token -> {
+              if (!token.finished()) {
+                logger.info("{}", token.text());
+              }
+            });
+    logger.info("Final SQL: {}", response.sql());
 
-    // Execute
     var df = chat.run(response);
-    System.out.println(df.toText());
+    logger.info("{}", df.toText());
   }
 }

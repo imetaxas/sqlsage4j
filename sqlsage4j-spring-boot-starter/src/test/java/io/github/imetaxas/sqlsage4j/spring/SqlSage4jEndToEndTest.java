@@ -1,7 +1,7 @@
 package io.github.imetaxas.sqlsage4j.spring;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static io.github.imetaxas.realitycheck.RealityAssertions.assertThat;
+import static io.github.imetaxas.realitycheck.RealityAssertions.assertThatThrownBy;
 
 import io.github.imetaxas.sqlsage4j.ChatMessage;
 import io.github.imetaxas.sqlsage4j.QueryChat;

@@ -6,6 +6,8 @@ import io.github.imetaxas.sqlsage4j.db.SQLiteConnector;
 import io.github.imetaxas.sqlsage4j.enums.PromptEnum;
 import io.github.imetaxas.sqlsage4j.pipeline.SqlGuard;
 import java.time.Duration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Production-grade setup with OpenAI, caching, rate limiting, and safety guards.
@@ -13,6 +15,8 @@ import java.time.Duration;
  * Prerequisites: Set OPENAI_API_KEY environment variable.
  */
 public class OpenAIExample {
+
+  private static final Logger logger = LogManager.getLogger(OpenAIExample.class);
 
   public static void main(String[] args) {
     String apiKey = System.getenv("OPENAI_API_KEY");
@@ -40,9 +44,9 @@ public class OpenAIExample {
 
     // Ask and execute
     var response = chat.ask("Which artist has the most albums?");
-    System.out.println("Generated SQL: " + response.sql());
+    logger.info("Generated SQL: {}", response.sql());
 
     var df = chat.run(response);
-    System.out.println(df.toCsv());
+    logger.info("{}", df.toCsv());
   }
 }
